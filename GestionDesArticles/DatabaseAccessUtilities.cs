@@ -19,7 +19,7 @@ namespace GestionDesArticles
                 }
                 catch(OleDbException e)
                 {
-                    throw new MyException(e,"Database connection Error","Failed to connect to database","Data access Layer");
+                    throw new MyException("Database connection Error","Failed to connect to database","Data access Layer");
                 }
                 return command.ExecuteNonQuery();
             }
@@ -36,14 +36,26 @@ namespace GestionDesArticles
         {
             try
             {
+                try
+                {
+                    connection.Open();
 
+                }
+                catch(OleDbException e)
+                {
+                    throw new MyException("Connection to database error", "Failed to connect to database", "Data Access Layer");
+                }
+                OleDbCommand cmd=new OleDbCommand(StrRequest,connection);
+                return cmd.ExecuteNonQuery();
             }
-            catch(Exception e) { 
-            
+            catch(Exception e) {
+                throw new MyException(e, "Database error", e.Message, "data access Layer");
             }
-        }
-        {
-
+            finally
+            {
+                connection.Close();
+            }
+        
         }
         //This is an inheritance of the class Exception which we will be using later
         public class MyException : Exception
