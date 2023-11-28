@@ -57,6 +57,10 @@ namespace GestionDesArticles
             }
         
         }
+        public static object ScalarRequest()
+        {
+
+        }
         //This is an inheritance of the class Exception which we will be using later
         public class MyException : Exception
         {
