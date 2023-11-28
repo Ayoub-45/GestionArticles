@@ -1,5 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
 using System.Data.OleDb;
 using System.Linq;
 using System.Text;
@@ -57,12 +58,136 @@ namespace GestionDesArticles
             }
         
         }
-        public static object ScalarRequest()
+        public static object ScalarRequest(OleDbCommand cmd)
         {
+            try
+            {
+                try
+                {
+                    cmd.Connection.Open();
+                    
+                }
+                catch(OleDbException e)
+                {
+                    throw new MyException(e, "Connection to database error", "Failed to connect to the database", "Data access Layer");
+
+                }
+                return cmd.ExecuteScalar();
+            }
+            catch (OleDbException e)
+            {
+                throw new MyException(e, "Database Error", "Failed to execute the query", "Data Access Layer");
+            }
+            finally
+            {
+                cmd.Connection.Close();
+            }
+        }
+        public static DataTable DisconnectedSelectRequest(OleDbCommand command)
+        {
+            try
+            {
+                DataTable table;
+                OleDbDataAdapter selectAdapter = new OleDbDataAdapter(command);
+                table = new DataTable();
+                selectAdapter.Fill(table);
+                return table;
+
+            }
+            catch(OleDbException e)
+            {
+                throw new MyException(e, "Database Error", e.Message, "Data Access Layer");
+            }
+        }
+        public static DataTable DisconnectedSelectRequest(string StrSelectRequest, OleDbConnection MyConnection)
+        {
+            try
+            {
+                DataTable Table;
+                OleDbCommand SelectCommand = new OleDbCommand(StrSelectRequest, MyConnection);
+                OleDbDataAdapter SelectAdapter = new OleDbDataAdapter(SelectCommand);
+                Table = new DataTable();
+                SelectAdapter.Fill(Table);
+                return Table;
+            }
+            catch (OleDbException e)
+            {
+
+                throw new MyException(e, "DataBase Error", "Erreur d'éxecution de la requête de sélection : \n", "DAL");
+
+            }
+            finally
+            {
+                MyConnection.Close();
+            }
+        }
+        public static OleDbDataReader ConnectedSelectRequest(OleDbCommand MyCommand)
+        {
+            try
+            {
+                MyCommand.Connection.Open();
+                OleDbDataReader dr = MyCommand.ExecuteReader();
+                return dr;
+
+            }
+            catch (OleDbException e)
+            {
+                //throw new MyException(e, "DataBase Error", "Erreur d'éxecution de la requête de sélection : \n", "DAL");
+                throw new MyException(e, "DataBase Errors", e.Message, "DAL");
+            }
+            finally
+            {
+                MyCommand.Connection.Close();
+            }
+        }
+        public static bool CheckFieldValueExistence(string TableName, string FieldName, OleDbType FieldType, object FieldValue, OleDbConnection MyConnection)
+        {
+            try
+            {
+                string StrRequest = "SELECT COUNT(" + FieldName + ") FROM " + TableName + " WHERE ((" + FieldName + " = @" + FieldName + ")";
+                StrRequest += "OR ( (@" + (FieldName + 1).ToString() + " IS NULL)AND (" + FieldName + " IS NULL)))";
+                OleDbCommand Command = new OleDbCommand(StrRequest, MyConnection);
+                Command.Parameters.Add("@" + FieldName, FieldType).Value = FieldValue;
+                Command.Parameters.Add("@" + FieldName + 1, FieldType).Value = FieldValue;
+                return ((int)DatabaseAccessUtilities.ScalarRequest(Command) != 0);
+            }
+            catch (OleDbException e)
+            {
+                throw new MyException(e, "DataBase Error", "There has been an error of Execution of the query : \n", "Data access Layer");
+            }
+            finally
+            {
+                MyConnection.Close();
+            }
 
         }
-        //This is an inheritance of the class Exception which we will be using later
-        public class MyException : Exception
+        public static object GetMaxFieldValue(OleDbConnection MyConnection, string TableName, string FieldName)
+        {
+            try
+            {
+                string StrMaxRequest = "SELECT MAX(" + FieldName + ") FROM " + TableName;
+
+                OleDbCommand Command = new OleDbCommand(StrMaxRequest, MyConnection);
+                return (DatabaseAccessUtilities.ScalarRequest(Command));
+
+            }
+            catch (OleDbException e)
+            {
+                throw new MyException(e, "DataBase Error", "Execution error of verification of the existence of the value : \n", "Data Access Layer");
+            }
+            finally
+            {
+                MyConnection.Close();
+            }
+        }
+
+    }
+
+
+
+
+    //This is an inheritance of the class Exception which we will be using later
+    public class MyException : Exception
         {
                 string _Level;
                 string _MyExceptionTitle;
