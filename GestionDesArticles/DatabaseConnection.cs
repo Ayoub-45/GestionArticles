@@ -9,7 +9,7 @@ namespace GestionDesArticles
 {
     internal class DatabaseConnection
     {
-        static string path = "C:\\Users\\Dell\\Desktop\\ArticlesDb.accdb";
+        static string path = "C:\\Users\\Dell\\Desktop\\ArticlesDB.accdb";
         static string StrCnn = $"Provider=Microsoft.ACE.OLEDB.12.0; Data Source = {path}";
         public static OleDbConnection GetConnection()
         {
