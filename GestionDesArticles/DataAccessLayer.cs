@@ -16,7 +16,7 @@ namespace GestionDesArticles
             int NbOccs = 0;
             using (OleDbConnection Cnn = DatabaseConnection.GetConnection())
             {
-                string StrSQl = $"SELECT COUNT(*) FROM Aritcle WHERE reference={EntityKey}";
+                string StrSQl = $"SELECT COUNT(*) FROM Article WHERE reference={EntityKey}";
                 OleDbCommand Cmd = new OleDbCommand(StrSQl, Cnn);
                 Cmd.Parameters.AddWithValue("@EntityKey", EntityKey);
                 NbOccs = (int)DatabaseAccessUtilities.ScalarRequest(Cmd);
@@ -58,20 +58,21 @@ namespace GestionDesArticles
 
         }
         public static  void Add(Article a)
-        {
+        {   
             using(OleDbConnection cnn = DatabaseConnection.GetConnection())
             {
                 if(CheckEntityUnicity(a.Reference)==true)
                 {
-                    string StrSQL = "INSERT INTO Article(reference,designation,categorie,prix,dateFabrication,promo VALUES(@reference,@designation,@categorie,@prix,@dateFabrication,@promo)";
+                    string StrSQL = "INSERT INTO Article(Reference,Designation,Categorie,Prix,DateFabrication,Promo) VALUES(@Reference,@Designation,@Categorie,@Prix,@DateFabrication,@Promo)";
                     OleDbCommand Cmd=new OleDbCommand(StrSQL, cnn);
-                    Cmd.Parameters.Add("@reference", OleDbType.Integer).Value = a.Reference;
-                    Cmd.Parameters.Add("@designation",OleDbType.VarChar).Value = a.Designation;
-                    Cmd.Parameters.Add("@categorie", OleDbType.VarChar).Value = a.Categorie;
-                    Cmd.Parameters.Add("@prix", OleDbType.Single).Value = a.Prix;
-                    Cmd.Parameters.Add("@dateFabrication", OleDbType.Date).Value = a.DateFabrication;
-                    Cmd.Parameters.Add("@promo",OleDbType.Boolean).Value = a.Promo;
+                    Cmd.Parameters.Add("@Reference", OleDbType.Integer).Value = a.Reference;
+                    Cmd.Parameters.Add("@Designation",OleDbType.VarChar).Value = a.Designation;
+                    Cmd.Parameters.Add("@Categorie", OleDbType.VarChar).Value = a.Categorie;
+                    Cmd.Parameters.Add("@Prix", OleDbType.Single).Value = a.Prix;
+                    Cmd.Parameters.Add("@DateFabrication", OleDbType.DBDate).Value = a.DateFabrication;
+                    Cmd.Parameters.Add("@Promo",OleDbType.Boolean).Value = a.Promo;
                     DatabaseAccessUtilities.NonQueryRequest(Cmd);
+                    Console.WriteLine("Executing the query");
 
                 }
                 else
@@ -97,7 +98,7 @@ namespace GestionDesArticles
             {
                 if (CurArticle.Reference != NewArticle.Reference)
                 {
-                    throw new MyException("Error occurs in modifying non existing Article", "New Refernce is already in use", 'Data Access Layer');
+                    throw new MyException("Error occurs in modifying non existing Article", "New Refernce is already in use", "Data Access Layer");
 
                 }
                 else
@@ -151,7 +152,7 @@ namespace GestionDesArticles
                         while (dr.Read())
                         {
                             p = new Article();
-                            p.Reference = dr.GetInt16(0);
+                            p.Reference = dr.GetInt32(0);
                             p.Designation = dr.GetString(1);
                             p.Categorie = dr.GetString(2);
                             p.Prix = dr.GetFloat(3);

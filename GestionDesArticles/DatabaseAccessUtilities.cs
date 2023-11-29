@@ -26,7 +26,7 @@ namespace GestionDesArticles
             }
             catch(Exception e)
             {
-                throw new MyException(e, "Database error", e.Message, "Data access Layer");
+                throw new MyException(e, "Database error with query",e.Message, "Data access Layer");
             }
             finally {
                 command.Connection.Close();
@@ -50,7 +50,7 @@ namespace GestionDesArticles
                 return cmd.ExecuteNonQuery();
             }
             catch(Exception e) {
-                throw new MyException(e, "Database error", e.Message, "data access Layer");
+                throw new MyException(e, "Database query error",e.Message, "data access Layer");
             }
             finally
             {
@@ -76,7 +76,7 @@ namespace GestionDesArticles
             }
             catch (OleDbException e)
             {
-                throw new MyException(e, "Database Error", "Failed to execute the query", "Data Access Layer");
+                throw new MyException(e, "Database Error", e.Message, "Data Access Layer");
             }
             finally
             {
@@ -216,5 +216,4 @@ namespace GestionDesArticles
         }
     }
     //////////////////////
-    
-}
+  

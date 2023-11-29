@@ -6,8 +6,8 @@
         
         static void Main(string[] args)
         {
-             
-            
+
+            ConsoleUserInterface.Menu();
         }
     }
 }
